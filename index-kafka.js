@@ -17,7 +17,7 @@ let initialWebhook = 0;
 let webhooksRegistered = [];
 
 app.get("/", async (req, res) => {
-  const { jobname, jobends } = req.query;
+  const { jobname, jobends, jobcancel } = req.query;
 
   console.log(
     "'/' | triggered at @ " +

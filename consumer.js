@@ -23,6 +23,9 @@ const processRoomExpiry = async (message) => {
         console.log(data.data);
       });
   });
+
+  console.log("job ----->",job)
+
 };
 
 const run = async () => {
