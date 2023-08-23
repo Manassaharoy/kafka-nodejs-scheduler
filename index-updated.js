@@ -1,15 +1,7 @@
 const express = require("express");
 const app = express();
-// const schedule = require("node-schedule");
-const axios = require("axios");
-const { Kafka } = require("kafkajs");
-
-const kafka = new Kafka({
-  clientId: "my-app",
-  brokers: ["localhost:9092"], // Change to your Kafka broker addresses
-});
-
-const producer = kafka.producer();
+const createKafkaProducer = require("./config/kafkaConfig");
+const producer = createKafkaProducer(["localhost:9092"], "my-app");
 
 app.use(express.json());
 
@@ -35,16 +27,7 @@ app.get("/", async (req, res) => {
       jobends: parseInt(jobends),
     });
 
-    await producer.connect();
-    await producer.send({
-      topic: "one",
-      messages: [
-        {
-          value: JSON.stringify({ jobname, jobends }),
-        },
-      ],
-    });
-    await producer.disconnect();
+    await producer.send("one", JSON.stringify({ jobname, jobends }));
 
     res.send(webhooksRegistered);
   } catch (error) {
@@ -64,6 +47,7 @@ app.post("/webhook", (req, res) => {
   });
 });
 
-app.listen(3000, () => {
+app.listen(3000, async () => {
+  await producer.connect();
   console.log("Example app listening on port 3000!");
 });
