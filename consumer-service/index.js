@@ -9,35 +9,37 @@ app.use(express.json());
 let scheduledJobs = {}; // To store the scheduled jobs
 
 const kafka = new Kafka({
-  clientId: "my-app",
+  clientId: "rtc-service",
   brokers: ["localhost:9092"], // Change to your Kafka broker addresses
 });
 
 const consumer = kafka.consumer({ groupId: "room-creation-consumer" });
 
 const processRoomExpiry = async (message) => {
-  const { jobname, jobends } = JSON.parse(message.value.toString());
+  const { roomid, duration } = JSON.parse(message.value.toString());
 
-  const jobStartTime = new Date(Date.now() + parseInt(jobends) * 1000); // 10 seconds from now
+  // const jobStartTime = new Date(Date.now() + parseInt(jobends) * 1000); // 10 seconds from now
 
-  console.log(new Date() + " ----  " + jobStartTime);
+  // console.log(new Date() + " ----  " + jobStartTime);
 
-  const job = schedule.scheduleJob(jobStartTime, async function () {
-    await axios
-      .post(`http://localhost:3000/webhook?jobname=${jobname}`)
-      .then((data) => {
-        console.log(data.data);
-      });
-  });
+  // const job = schedule.scheduleJob(jobStartTime, async function () {
+  //   await axios
+  //     .post(`http://localhost:3000/webhook?jobname=${jobname}`)
+  //     .then((data) => {
+  //       console.log(data.data);
+  //     });
+  // });
 
-  const jobId = `job_${jobname}`;
-  scheduledJobs[jobId] = { job: job, running: true };
+  // const jobId = `job_${jobname}`;
+  // scheduledJobs[jobId] = { job: job, running: true };
+
+  console.log("kafka consumed roomid" + roomid + " duration " + duration);
 };
 
 const run = async () => {
   await consumer.connect();
   await consumer.subscribe({
-    topic: "one",
+    topic: "createroom",
     fromBeginning: true,
   });
 
